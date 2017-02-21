@@ -25,6 +25,7 @@ else if (cmd ==="create"){
     }
     var guests = JSON.parse(data);
     var guest = process.argv[3];
+    console.log(process.argv[3]);
 
     if(!guest) {
       console.error(`Usage: ${node} ${file} ${cmd} GUEST`);
@@ -38,7 +39,6 @@ else if (cmd ==="create"){
           if (writeErr) {
             throw writeErr;
           }
-
           console.log(guest);
         });
       });
