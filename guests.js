@@ -1,49 +1,54 @@
 'use strict';
 
-var fs = require ('fs'); //module requires file system mgmt
-var path = require ('path'); //module requires file to connect to dir
-var guestsPath = path.join(__dirname, 'guests.json'); //joins directory to file name
+var fs = require('fs');
+var path = require('path');
+var guestsPath = path.join(__dirname, 'guests.json');
 
-var node = path.basename(process.argv[0]);
-var file = path.basename(process.argv[1]);
-var cmd = process.argv[2];
+var express = require('express');
+var app = express();
+var port = process.env.PORT || 8000;
 
-if (cmd === 'read') {
-fs.readFile(guestsPath, 'utf8', function(err, data){
-  if (err) {
-    throw err;
-  }
-  var guests = JSON.parse(data);
+var morgan = require('morgan');
 
-  console.log(guests); //returns empty array with no data
+app.disable('x-powered-by');
+app.use(morgan('short'));
+
+app.get('/guests', function(req, res) {
+  fs.readFile(guestsPath, 'utf8', function(err, guestsJSON) {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
+
+    var guests = JSON.parse(guestsJSON);
+
+    res.send(guests);
   });
-}
-else if (cmd ==="create"){
-  fs.readFile(guestsPath, 'utf8', function(readErr, data){
-    if (readErr){
-      throw readErr;
-    }
-    var guests = JSON.parse(data);
-    var guest = process.argv[3];
-    console.log(process.argv[3]);
+});
 
-    if(!guest) {
-      console.error(`Usage: ${node} ${file} ${cmd} GUEST`);
-      process.exit(1);
+app.get('/guests/:id', function(req, res) {
+  fs.readFile(guestsPath, 'utf8', function(err, guestsJSON) {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
     }
-    guests.push(guest);
 
-        var guestsJSON = JSON.stringify(guests);
+    var id = Number.parseInt(req.params.id);
+    var guests = JSON.parse(guestsJSON);
 
-        fs.writeFile(guestsPath, guestsJSON, function(writeErr) {
-          if (writeErr) {
-            throw writeErr;
-          }
-          console.log(guest);
-        });
-      });
+    if (id < 0 || id >= guests.length || Number.isNaN(id)) {
+      return res.sendStatus(404);
     }
- else {
-  console.error(`Usage: ${node} ${file} read`);
-  process.exit(1);
-}
+
+    res.set('Content-Type', 'text/plain');
+    res.send(guests[id]);
+  });
+});
+
+app.use(function(req, res) {
+  res.sendStatus(404);
+});
+
+app.listen(port, function() {
+  console.log('Listening on port', port);
+});
