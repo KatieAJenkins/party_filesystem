@@ -4,17 +4,18 @@ var express = require('express'); //require express
 var app = express();
 
 var guests = [{ name: 'Teagan' }, {name: 'Katie'}, {name: 'Brando'}];
-console.log(guests);
+// console.log(guests);
 
 //morgan = npm module that logs information in console
 var morgan = require('morgan'); //require morgan. cmd --> npm install --save morgan
 app.use(morgan('dev')); //can type 'dev' = more readable
-console.log(morgan);
+// console.log(morgan);
 
 var bodyParser = require('body-parser'); //need to npm install --save body-parser
 app.use(bodyParser.json());
 
 app.get('/guests', function(req, res) { //gets list of all guests in object
+  console.log(req);
   res.send(guests); //sending this data back to client
 });
 
